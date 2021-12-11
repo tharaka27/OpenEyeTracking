@@ -117,3 +117,4 @@ class Eye(object):
 
         threshold = calibration.threshold(side)
         self.pupil = Pupil(self.frame, threshold)
+        cv2.imshow("seye", self.frame)

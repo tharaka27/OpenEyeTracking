@@ -7,8 +7,8 @@ import cv2
 from gaze_tracking import GazeTracking
 
 gaze = GazeTracking()
-#webcam = cv2.VideoCapture(0)
-webcam = cv2.VideoCapture("eye.mp4")
+webcam = cv2.VideoCapture(0)
+#webcam = cv2.VideoCapture("eye.mp4")
 
 
 while True:
