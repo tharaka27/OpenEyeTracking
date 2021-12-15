@@ -2,6 +2,21 @@ from __future__ import print_function
 import cv2 as cv
 import numpy as np
 
+def findFourNearestPointsToCenter(points, size):
+    center_x = size[0]//2
+    center_y = size[1]//2
+    points.append([0,0])
+    points.append([0,0])
+    points.append([0,0])
+    points.append([0,0])
+
+    #print(size)
+    #print("center ", center_x, center_y)
+
+    points.sort(key = lambda x: (x[0]- center_x)**2 + (x[1]- center_y)**2)
+    return points[:4]
+    
+
 def detectAndDisplay(frame):
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     frame_gray = cv.equalizeHist(frame_gray)
@@ -34,9 +49,9 @@ def detectAndDisplay(frame):
         else:
             cX, cY = 0, 0
 
-        points_list = []
+        points_list = [] 
 
-        #Mark the contours in the image 
+         #Mark the contours in the image 
         for c in contours:
             # calculate moments for each contour
             M = cv.moments(c)
@@ -49,9 +64,40 @@ def detectAndDisplay(frame):
             else:
                 g_cX = 0
                 g_cY = 0
-            cv.circle(glint_color, (g_cX, g_cY), 5, (0, 0, 255), -1)
+            #cv.circle(glint_color, (g_cX, g_cY), 5, (0, 0, 255), -1)
 
-        print(points_list)
+        #print(points_list)
+        nearest = findFourNearestPointsToCenter(points_list, glint_color.shape)
+        print("nearest -> ",nearest)
+        print("eye point ->", cX, cY)
+        for g_cX,g_cY in nearest:
+            cv.circle(glint_color, (g_cX, g_cY), 5, (0, 0, 255), -1)
+        
+        t_r_x , t_r_y = nearest[0][0], nearest[0][1]
+        t_l_x , t_l_y = nearest[3][0], nearest[3][1]
+        b_r_x , b_r_y = nearest[1][0], nearest[1][1]
+        b_l_x , b_l_y = nearest[2][0], nearest[2][1]
+
+        x_1 = (t_l_x + b_l_x ) // 2
+        x_2 = (t_r_x + b_r_x ) // 2
+
+        y_1 = (t_l_y + t_r_y ) // 2
+        y_2 = (b_l_y + b_r_y ) // 2
+
+        if( x_2 != x_1 and y_2 != y_1):
+            estimate_x = int( (1920*cX)//(x_2 - x_1))
+            estimate_y = int( (1024*cY)//(y_2 - y_1))
+        else:
+            estimate_x = 0
+            estimate_y = 0
+            
+
+
+        if estimate_x > 0  and estimate_x < 1920:
+             if estimate_y > 0  and estimate_y < 1024:
+                 print("estimated x" , estimate_x , " estimated_y ", estimate_y)
+
+
 
         # draw the centroid in the pupil image
         pupil_color = cv.circle(pupil_color, (cX, cY), radius=5, color=(0,0,255), thickness=-1)
